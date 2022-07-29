@@ -1,2 +1,8 @@
+name = "RandomLowRank"
+uuid = "a5f30e3a-bfb0-40eb-8958-c0d40cb86750"
+authors = ["Robin Armstrong <rja243@cornell.edu>"]
+version = "0.1.0"
+
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

@@ -1,3 +1,10 @@
+"""
+	DimensionError(msg)
+
+Error type to indicate inappropriate matrix dimensions in cases not
+covered by DimensionMismatch.
+"""
 struct DimensionError <: Exception
-	message::String
+	msg::String
 end
+
