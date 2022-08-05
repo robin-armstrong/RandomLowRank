@@ -7,4 +7,3 @@ covered by DimensionMismatch.
 struct DimensionError <: Exception
 	msg::String
 end
-

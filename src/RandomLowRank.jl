@@ -1,6 +1,8 @@
 module RandomLowRank
 
+export rqrcp
+
 include("dimensionerror.jl")
-include("_thinqmult.jl")
+include("rqrcp.jl")
 
 end
