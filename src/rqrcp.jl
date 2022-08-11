@@ -1,49 +1,44 @@
 using LinearAlgebra
 
 """
-	rqrcp(A, k, [p = 0, qrmat, jpvt, tau, basis]; orthobasis = false)
+	rqrcp(A, k, p = 0; format = "standard", sketch = gaussianSketchLeft, orthonormal = false)
 
-Select `k` skeleton columns of a real matrix  `A` using QRCP on a randomized
-sketch with `k + p` columns. If `orthobasis == true` then also compute an 
-orthonormal basis for the span of the skeleton columns. Optional arguments 
-`qrmat`, `jpvt`, and `tau` provide preallocated memory for `LAPACK.geqp3!`.
-Optional argument `basis` provides preallocated memory to store the orthonormal
-basis vectors.
+Compute an approximate factorization `A = R1*R2` where `R1` consists of `k` skeleton
+columns from `A`. Choose columns using Businger-Golub QRCP on `sketch(A, k, p)`, where `p` is an
+oversampling parameter. If `returnFormat == "minimal"` then only the indices of the skeleton
+columns are computed. If `returnFormat == "full"` then `R1`, `R2` are returned along with
+the indices of the skeleton columns. If `orthonormal == true` then the columns of `R1`
+are orthonormalized. 
 """
-function rqrcp(A::Matrix{F}, k::Integer, p::Integer = 0,
-				sketch::Matrix{F} = Matrix{F}(undef, k + p, size(A, 2)),
-				jpvt::Vector{Itg} = Vector{Int64}(undef, size(A, 2)),
-				tau::Vector{F} = Vector{F}(undef, k + p),
-				basis::Union{Matrix{F}, Nothing} = Nothing ;
-				orthobasis::Bool = false
-				) where {F <: AbstractFloat, Itg <: Integer}
+function rqrcp(A::Matrix, k::Integer, p::Integer = 0 ;
+				format::String = "standard",
+				sketch = gaussianSketchLeft,
+				orthonormal::Bool = false)
 	
-	if(k < 1)
-		throw(DimensionError("second argument must be a positive integer"))
+	if((k < 0) || (k > min(size(A, 1), size(A, 2))))
+		throw(RankError("the target rank must be at least 1 and at most "*string(min(size(A, 1), size(A, 2)))))
+	
 	elseif(p < 0)
-		throw(DimensionError("oversampling parameter must be a nonnegative integer"))
-	elseif(k + p > size(A, 2))
-		throw(DimensionError("row dimension of sketch cannot exceed row dimension of first argument"))
-	elseif(size(sketch) != (k + p, size(A, 2)))
-		throw(DimensionMismatch("preallocated sketching matrix must have dimensions ("*string(k + p)*", "*string(size(A, 2))*")"))
-	elseif(length(jpvt) != size(A, 2))
-		throw(DimensionMismatch("preallocated vector of pivots must have length "*string(size(A, 2))))
-	elseif(length(tau) != k + p)
-		throw(DimensionMismatch("preallocated vector of Householder scalars must have length "*string(k + p)))
-	elseif(orthobasis)
-		if((basis != Nothing) && (size(basis) != (size(A, 1), k)))
-			throw DimensionMismatch("preallocated basis matrix must have dimensions ("*string(size(A, 1))*", "*string(k)*")")
-		end
+		throw(SketchError("the oversampling parameter must be nonnegative"))
+	
+	elseif((format != "minimal") && (format != "standard") && (format != "full"))
+		throw(ErrorException("options for return format are `minimal`, `standard`, and `full`"))
 	end
 	
-	sketch[:, :] = randn(k + p, size(A, 1))*A
-	LAPACK.geqp3!(sketch, jpvt, tau)
+	qrobj = qr(sketch(A, k + p), ColumnNorm())
+	perm = qrobj.p[1:k]
 	
-	if(orthobasis)
-		if(basis == Nothing)
-			basis = Matrix{F}(I(size(A, 1)))[1:k]
-		end
+	if(format == "minimal")
+		return perm
+	end
+	
+	R1 = orthonormal ? Matrix(qr(A[:, perm]).Q) : A[:, perm]
+	R1p = orthonormal ? R1' : pinv(R1)
+	R2 = R1p*A
+	
+	if(format == "standard")
+		return R1, R2
 	else
-		return jpvt[1:k]
+		return R1, R2, perm
 	end
 end

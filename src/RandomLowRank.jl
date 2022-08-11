@@ -1,8 +1,10 @@
 module RandomLowRank
 
-export rqrcp
+export rqrcp, noSketch, gaussianSketchLeft, gaussianSketchRight
 
-include("dimensionerror.jl")
+include("exceptions.jl")
+include("sketches.jl")
+
 include("rqrcp.jl")
 
 end
