@@ -2,8 +2,9 @@
 Functions to compute randomized sketches of matrices. Each has the signature
 `mySketch(A::Matrix, l::Integer, side::String)`, where`A` is the matrix being
 sketched and `l` indicates the target dimension of the sketch. If `side == "left"`
-then the returned matrix has dimensions `(l, size(A, 2))`, and if `side == "right"`
-then the returned matrix has dimensions `(size(A, 1), l)`.
+then the returned matrix has dimensions `(c, size(A, 2))` where `c >= l`, and if
+`side == "right"` then the returned matrix has dimensions `(size(A, 1), r)` with
+`r >= l`.
 =#
 
 # a "do-nothing" sketch to allow for deterministic use of sketching-based algorithms.

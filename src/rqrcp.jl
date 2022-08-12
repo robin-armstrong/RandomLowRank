@@ -3,11 +3,11 @@ using LinearAlgebra
 """
 	rqrcp(A, k, p = 0; format = "standard", sketch = gaussianSketch, orthonormal = false)
 
-Compute an approximate factorization `A = R1*R2` where `R1` consists of `k` skeleton
+Compute an approximate factorization `A = C*B` where `C` consists of `k` skeleton
 columns from `A`. Choose columns using Businger-Golub QRCP on `sketch(A, k, p)`, where `p` is an
 oversampling parameter. If `returnFormat == "minimal"` then only the indices of the skeleton
-columns are computed. If `returnFormat == "full"` then `R1`, `R2` are returned along with
-the indices of the skeleton columns. If `orthonormal == true` then the columns of `R1`
+columns are computed. If `returnFormat == "full"` then `C`, `B` are returned along with
+the indices of the skeleton columns. If `orthonormal == true` then the columns of `C`
 are orthonormalized. 
 """
 function rqrcp(A::Matrix, k::Integer, p::Integer = 0 ;
@@ -33,13 +33,9 @@ function rqrcp(A::Matrix, k::Integer, p::Integer = 0 ;
 		return perm
 	end
 	
-	R1 = orthonormal ? Matrix(qr(A[:, perm]).Q) : A[:, perm]
-	R1p = orthonormal ? R1' : pinv(R1)
-	R2 = R1p*A
+	C = orthonormal ? Matrix(qr(A[:, perm]).Q) : A[:, perm]
+	Cp = orthonormal ? C' : pinv(C)
+	B = Cp*A
 	
-	if(format == "standard")
-		return R1, R2
-	else
-		return R1, R2, perm
-	end
+	return C, B, perm
 end
