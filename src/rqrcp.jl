@@ -1,7 +1,7 @@
 using LinearAlgebra
 
 """
-	rqrcp(A, k, p = 0; format = "standard", sketch = gaussianSketchLeft, orthonormal = false)
+	rqrcp(A, k, p = 0; format = "standard", sketch = gaussianSketch, orthonormal = false)
 
 Compute an approximate factorization `A = R1*R2` where `R1` consists of `k` skeleton
 columns from `A`. Choose columns using Businger-Golub QRCP on `sketch(A, k, p)`, where `p` is an
@@ -12,7 +12,7 @@ are orthonormalized.
 """
 function rqrcp(A::Matrix, k::Integer, p::Integer = 0 ;
 				format::String = "standard",
-				sketch = gaussianSketchLeft,
+				sketch = gaussianSketch,
 				orthonormal::Bool = false)
 	
 	if((k < 0) || (k > min(size(A, 1), size(A, 2))))

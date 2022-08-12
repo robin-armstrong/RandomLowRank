@@ -1,7 +1,7 @@
 using LinearAlgebra
 
 """
-	rgks(A, k, p = 0; format = "standard", sketch = gaussianSketchRight, orthonormal = false)
+	rgks(A, k, p = 0; format = "standard", sketch = gaussianSketch, orthonormal = false)
 
 Compute an approximate factorization `A = R1*R2` where `R1` consists of `k` skeleton
 columns from `A`. Choose columns using the procedure of Golub, Klemma, and Stewart (1976) 
@@ -12,7 +12,7 @@ then the columns of `R1` are orthonormalized.
 """
 function rgks(A::Matrix, k::Integer, p::Integer = 0 ;
 				format::String = "standard",
-				sketch = gaussianSketchRight,
+				sketch = gaussianSketch,
 				orthonormal::Bool = false)
 	
 	if((k < 0) || (k > min(size(A, 1), size(A, 2))))
