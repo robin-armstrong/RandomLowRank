@@ -16,16 +16,18 @@ function rgks(A::Matrix, k::Integer, p::Integer = 0 ;
 				orthonormal::Bool = false)
 	
 	if((k < 0) || (k > min(size(A, 1), size(A, 2))))
-		throw(RankError("the target rank must be at least 1 and at most "*string(min(size(A, 1), size(A, 2)))))
+		throw(RankError("the target rank ("*string(k)*") must be at least 1 and at most "*string(min(size(A, 1), size(A, 2)))))
 	
 	elseif(p < 0)
-		throw(SketchError("the oversampling parameter must be nonnegative"))
+		throw(SketchError("the oversampling parameter ("*string(p)*") must be nonnegative"))
 	
 	elseif((format != "minimal") && (format != "standard") && (format != "full"))
 		throw(ErrorException("options for return format are `minimal`, `standard`, and `full`"))
 	end
 	
-	V = Matrix(svd(sketch(A, k + p)).V)[:, 1:k]
+	sk = sketch(A, k + p, "right")
+	Q = Matrix(qr(sk).Q)
+	V = Matrix(svd(Q'*A).V)[:, 1:k]
 	qrobj = qr(V', ColumnNorm())
 	perm = qrobj.p[1:k]
 	

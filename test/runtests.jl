@@ -31,6 +31,19 @@ end
 A_tall = U*diagm(S)*V'
 A_wide = Matrix(A_tall')
 
+@testset "sketching tests" begin
+    M = randn(100, 100)
+    
+    sk = gaussianSketch(M, 50, "left")
+    @test size(sk) == (50, 100)
+    
+    sk = gaussianSketch(M, 50, "right")
+    @test size(sk) == (100, 50)
+    
+    sk = noSketch(M, 50, "left")
+    @test sk == M
+end
+
 @testset "rqrcp tests" begin
 	mats = [A_tall, A_wide]
 	matnames = ["A_tall", "A_wide"]
@@ -39,7 +52,7 @@ A_wide = Matrix(A_tall')
 		A = mats[i]
 		A_name = matnames[i]
 		
-		for sk in [noSketch, gaussianSketchLeft, gaussianSketchRight]
+		for sk in [noSketch, gaussianSketch]
 			for p in [0, 5, smallDim - numericalRank]
 				params = "parameters are A = "*A_name*", sk = "*string(sk)*", p = "*string(p)
 				
@@ -95,7 +108,7 @@ end
 		A = mats[i]
 		A_name = matnames[i]
 		
-		for sk in [noSketch, gaussianSketchLeft, gaussianSketchRight]
+		for sk in [noSketch, gaussianSketch]
 			for p in [0, 5, smallDim - numericalRank]
 				params = "parameters are A = "*A_name*", sk = "*string(sk)*", p = "*string(p)
 				
@@ -103,7 +116,7 @@ end
 				err = opnorm(A - R1*R2)*1e8
 				
 				if(err > 1000)
-					@warn("rqrcp tests: relative error from standard call exceeds 1000")
+					@warn("rgks tests: relative error from standard call exceeds 1000")
 					@info params
 				end
 				
@@ -115,7 +128,7 @@ end
 				err = opnorm(A - Q*Q'*A)*1e8
 				
 				if(err > 1000)
-					@warn("rqrcp tests: relative error from minimal call exceeds 1000")
+					@warn("rgks tests: relative error from minimal call exceeds 1000")
 					@info params
 				end
 				
@@ -125,7 +138,7 @@ end
 				err = opnorm(A - R1*R2)*1e8
 				
 				if(err > 1000)
-					@warn("rqrcp tests: relative error from full call exceeds 1000")
+					@warn("rgks tests: relative error from full call exceeds 1000")
 					@info params
 				end
 				
