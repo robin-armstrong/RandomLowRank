@@ -1,7 +1,7 @@
 using LinearAlgebra
 
 """
-	rsvd(A, k, p = 0, q = 0; format = "full", sketch = gaussianSketch)
+	rsvd(A, k, p = 0; power = 0, format = "full", sketch = gaussianSketch)
 
 Compute an approximate factorization `A = U*diagm(S)*V'` where `U` and `V` consist
 of `k` orthonormal columns and `S` is a vector of `k` approximate singular values. Use

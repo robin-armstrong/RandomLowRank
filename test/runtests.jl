@@ -18,14 +18,12 @@ residual = 1e-8
 
 U_true = Matrix(qr(randn(largeDim, smallDim)).Q)
 V_true = Matrix(qr(randn(smallDim, smallDim)).Q)
-S_true = Vector{Float64}(undef, smallDim)
+S_true = ones(smallDim)
 
-for i = 1:numericalRank
-	S_true[i] = numericalRank - i + 1.
-end
+rho = residual^(1/(numericalRank - 1))
 
-for i = numericalRank + 1:smallDim
-	S_true[i] = residual
+for i = 1:numericalRank - 1
+	S_true[i + 1:end] *= rho
 end
 
 A_tall = U_true*diagm(S_true)*V_true'
