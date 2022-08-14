@@ -37,5 +37,5 @@ function rqrcp(A::Matrix, k::Integer, p::Integer = 0 ;
 	Cp = orthonormal ? C' : pinv(C)
 	B = Cp*A
 	
-	return C, B, perm
+	return orthonormal ? OrthoSkeletalDecomp(perm, C, B) : SkeletalDecomp(perm, C, B)
 end

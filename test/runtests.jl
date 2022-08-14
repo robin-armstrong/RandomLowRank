@@ -65,7 +65,7 @@ end
 				
 				showInfo(params, @test length(perm) == numericalRank)
 				
-				C, B, perm = rqrcp(A, numericalRank, p, format = "full", sketch = sk)
+				perm, C, B = rqrcp(A, numericalRank, p, format = "full", sketch = sk)
 				err = opnorm(A - C*B)/residual
 				
 				if(err > 50)
@@ -78,7 +78,7 @@ end
 				showInfo(params, @test length(perm) == numericalRank)
 				
 				# testing orthonormalization
-				Q, B = rqrcp(A, numericalRank, p, sketch = sk, orthonormal = true)
+				_, Q, B = rqrcp(A, numericalRank, p, sketch = sk, orthonormal = true)
 				showInfo(params, @test size(Q) == (size(A, 1), numericalRank))
 				showInfo(params, @test size(B) == (numericalRank, size(A, 2)))
 				showInfo(params, @test opnorm(Q'*Q - I(numericalRank)) < 1e-10)
@@ -110,7 +110,7 @@ end
 				
 				showInfo(params, @test length(perm) == numericalRank)
 				
-				C, B, perm = rgks(A, numericalRank, p, format = "full", sketch = sk)
+				perm, C, B = rgks(A, numericalRank, p, format = "full", sketch = sk)
 				err = opnorm(A - C*B)/residual
 				
 				if(err > 50)
@@ -123,7 +123,7 @@ end
 				showInfo(params, @test length(perm) == numericalRank)
 				
 				# testing orthonormalization
-				Q, B = rgks(A, numericalRank, p, sketch = sk, orthonormal = true)
+				_, Q, B = rgks(A, numericalRank, p, sketch = sk, orthonormal = true)
 				showInfo(params, @test size(Q) == (size(A, 1), numericalRank))
 				showInfo(params, @test size(B) == (numericalRank, size(A, 2)))
 				showInfo(params, @test opnorm(Q'*Q - I(numericalRank)) < 1e-10)

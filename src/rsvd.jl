@@ -32,7 +32,7 @@ function rsvd(A::Matrix, k::Integer, p::Integer = 0 ;
 	Q = Matrix(qr(sk).Q)
 	
 	for i = 1:power
-		Q = Matrix(qr(A*A'*Q).Q)
+		Q = Matrix(qr(A*(A'*Q)).Q)
 	end
 	
 	svdobj = svd(Q'*A)
@@ -44,5 +44,5 @@ function rsvd(A::Matrix, k::Integer, p::Integer = 0 ;
 	U = Q*svdobj.U[:, 1:k]
 	V = Matrix(svdobj.V)[:, 1:k]
 	
-	return U, svdobj.S[1:k], V
+	return RSVD(U, svdobj.S[1:k], V)
 end
