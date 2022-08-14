@@ -54,7 +54,7 @@ end
 			for p in [0, 5, smallDim - numericalRank]
 				params = "parameters are A = "*A_name*", s = "*string(s)*", p = "*string(p)
 				
-				perm = rqrcp(A, numericalRank, p, format = "minimal", sk = s())
+				perm = rqrcp(A, numericalRank, p, minimal = true, sk = s())
 				Q = Matrix(qr(A[:, perm]).Q)
 				err = opnorm(A - Q*Q'*A)/residual
 				
@@ -65,7 +65,7 @@ end
 				
 				showInfo(params, @test length(perm) == numericalRank)
 				
-				perm, C, B = rqrcp(A, numericalRank, p, format = "full", sk = s())
+				perm, C, B = rqrcp(A, numericalRank, p, sk = s())
 				err = opnorm(A - C*B)/residual
 				
 				if(err > 50)
@@ -99,7 +99,7 @@ end
 			for p in [0, 5, smallDim - numericalRank]
 				params = "parameters are A = "*A_name*", s = "*string(s)*", p = "*string(p)
 				
-				perm = rgks(A, numericalRank, p, format = "minimal", sk = s())
+				perm = rgks(A, numericalRank, p, minimal = true, sk = s())
 				Q = Matrix(qr(A[:, perm]).Q)
 				err = opnorm(A - Q*Q'*A)/residual
 				
@@ -110,7 +110,7 @@ end
 				
 				showInfo(params, @test length(perm) == numericalRank)
 				
-				perm, C, B = rgks(A, numericalRank, p, format = "full", sk = s())
+				perm, C, B = rgks(A, numericalRank, p, sk = s())
 				err = opnorm(A - C*B)/residual
 				
 				if(err > 50)
@@ -145,7 +145,7 @@ end
 				for q in [0, 2, 4]
 					params = "parameters are A = "*A_name*", s = "*string(s)*", p = "*string(p)*", power = "*string(q)
 					
-					S = rsvd(A, numericalRank, p, power = q, sk = s(), format = "minimal")
+					S = rsvd(A, numericalRank, p, power = q, sk = s(), minimal = true)
 					showInfo(params, @test length(S) == numericalRank)
 					
 					errvect = broadcast(i -> (S[i] - S_true[i])^2/S_true[i]^2, 1:numericalRank)
@@ -193,7 +193,7 @@ end
 			for q in [0, 2, 4]
 				params = "parameters are s = "*string(s)*", p = "*string(p)*", power = "*string(q)
 				
-				lambda = rheigen(A, numValsToTest, p, power = q, sk = s(), format = "minimal")
+				lambda = rheigen(A, numValsToTest, p, power = q, sk = s(), minimal = true)
 				showInfo(params, @test length(lambda) == numValsToTest)
 				
 				errvect = broadcast(i -> (lambda[i] - lambda_true[i])^2/lambda_true[i]^2, 1:numValsToTest)

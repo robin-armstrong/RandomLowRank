@@ -1,18 +1,18 @@
 using LinearAlgebra
 
 """
-	rqrcp(A, k, p = 0; format = "full", sk = gaussianSketch(), orthonormal = false)
+	rqrcp(A, k, p = 0; minimal = false, sk = GaussianSketch(), orthonormal = false)
 
 Compute an approximate factorization `A = C*B` where `C` consists of `k` skeleton
 columns from `A`. Choose columns using Businger-Golub QRCP on a sketch of `A` computed
-according to `sk`, using oversampling `p`. If `returnFormat == "minimal"` then only the
-indices of the skeleton columns are computed. If `returnFormat == "full"` then `C`, `B`
+according to `sk`, using oversampling `p`. If `minimal == true` then only the
+indices of the skeleton columns are computed. If `minimal == false` then `C`, `B`
 are returned along with the indices of the skeleton columns. If `orthonormal == true` 
 then the columns of `C` are orthonormalized. 
 """
 function rqrcp(A::Matrix, k::Integer, p::Integer = 0 ;
-				format::String = "full",
-				sk::Sketch = gaussianSketch(),
+				minimal::Bool = false,
+				sk::Sketch = GaussianSketch(),
 				orthonormal::Bool = false)
 	
 	if((k < 0) || (k > min(size(A, 1), size(A, 2))))
@@ -20,16 +20,13 @@ function rqrcp(A::Matrix, k::Integer, p::Integer = 0 ;
 	
 	elseif(p < 0)
 		throw(SketchError("the oversampling parameter (*string(p)*) must be nonnegative"))
-	
-	elseif((format != "minimal") && (format != "full"))
-		throw(ErrorException("options for return format are `minimal` and `full`"))
 	end
 	
 	A_sk = sketch(A, k + p, "left", sk)
 	qrobj = qr(A_sk, ColumnNorm())
 	perm = qrobj.p[1:k]
 	
-	if(format == "minimal")
+	if(minimal)
 		return perm
 	end
 	

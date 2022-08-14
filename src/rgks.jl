@@ -1,18 +1,18 @@
 using LinearAlgebra
 
 """
-	rgks(A, k, p = 0; format = "full", sk = gaussianSketch(), orthonormal = false)
+	rgks(A, k, p = 0; minimal = false, sk = GaussianSketch(), orthonormal = false)
 
 Compute an approximate factorization `A = C*B` where `C` consists of `k` skeleton
 columns from `A`. Choose columns using the procedure of Golub, Klemma, and Stewart (1976) 
-on a sketch of `A` computed according to `k`, using oversampling `p`. If `returnFormat == "minimal"`
-then only the indices of the skeleton columns are computed. If `returnFormat == "full"` then
+on a sketch of `A` computed according to `sk`, using oversampling `p`. If `minimal == true`
+then only the indices of the skeleton columns are computed. If `minimal == false` then
 `C`, `B` are returned along with the indices of the skeleton columns. If `orthonormal == true`
-then the columns of `R1` are orthonormalized. 
+then the columns of `C` are orthonormalized. 
 """
 function rgks(A::Matrix, k::Integer, p::Integer = 0 ;
-				format::String = "full",
-				sk::Sketch = gaussianSketch(),
+				minimal::Bool = false,
+				sk::Sketch = GaussianSketch(),
 				orthonormal::Bool = false)
 	
 	if((k < 0) || (k > min(size(A, 1), size(A, 2))))
@@ -20,9 +20,6 @@ function rgks(A::Matrix, k::Integer, p::Integer = 0 ;
 	
 	elseif(p < 0)
 		throw(SketchError("the oversampling parameter ("*string(p)*") must be nonnegative"))
-	
-	elseif((format != "minimal") && (format != "full"))
-		throw(ErrorException("options for return format are `minimal` and `full`"))
 	end
 	
 	A_sk = sketch(A, k + p, "right", sk)
@@ -31,7 +28,7 @@ function rgks(A::Matrix, k::Integer, p::Integer = 0 ;
 	qrobj = qr(V', ColumnNorm())
 	perm = qrobj.p[1:k]
 	
-	if(format == "minimal")
+	if(minimal)
 		return perm
 	end
 	

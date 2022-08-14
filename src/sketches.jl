@@ -29,7 +29,7 @@ Gaussian sketching, wherein `A` is multiplied by a standard Gaussian matrix.
 struct GaussianSketch <: Sketch
 end
 
-function sketch(A::Matrix, l::Integer, side::String, sketch::GaussianSketch)
+function sketch(A::Matrix, l::Integer, side::String, sk::GaussianSketch)
 	if(l < 1)
 	    throw(SketchError("target dimension of sketch must be positive"))
 	elseif(side == "left")

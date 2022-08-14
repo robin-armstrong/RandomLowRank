@@ -1,19 +1,19 @@
 using LinearAlgebra
 
 """
-	rsvd(A, k, p = 0; power = 0, format = "full", sk = gaussianSketch())
+	rsvd(A, k, p = 0; power = 0, minimal = false, sk = GaussianSketch())
 
 Compute an approximate factorization `A = U*diagm(S)*V'` where `U` and `V` consist
 of `k` orthonormal columns (singular vector estimates )and `S` is a vector of length `k`
 (singular value estimates) using the algorithm of Halko, Martinsson, and Tropp (2011) 
 with oversampling `p`, `power` steps of power iteration, and sketching specified by `sk`.
-If `format == "minimal"` then `U` is not computed and only the singular value estmiates are 
-returned. If  `format == "full"` then `U`, `S`, `V` are returned.
+If `minimal == true` then `U` is not computed and only the singular value estmiates are 
+returned. If  `minimal == false` then `U`, `S`, `V` are returned.
 """
 function rsvd(A::Matrix, k::Integer, p::Integer = 0 ;
 				power::Integer = 0,
-				format::String = "full",
-				sk::Sketch = gaussianSketch())
+				minimal::Bool = false,
+				sk::Sketch = GaussianSketch())
 	
 	if(power < 0)
 		throw(ErrorException("power iteration parameter ("*string(power)*") must be nonnegative"))
@@ -23,9 +23,6 @@ function rsvd(A::Matrix, k::Integer, p::Integer = 0 ;
 	
 	elseif(p < 0)
 		throw(SketchError("the oversampling parameter ("*string(p)*") must be nonnegative"))
-	
-	elseif((format != "minimal") && (format != "full"))
-		throw(ErrorException("options for return format are `minimal` and `full`"))
 	end
 	
 	A_sk = sketch(A, k + p, "right", sk)
@@ -37,7 +34,7 @@ function rsvd(A::Matrix, k::Integer, p::Integer = 0 ;
 	
 	svdobj = svd(Q'*A)
 	
-	if(format == "minimal")
+	if(minimal)
 		return svdobj.S[1:k]
 	end
 	
