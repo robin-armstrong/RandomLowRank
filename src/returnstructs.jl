@@ -21,7 +21,26 @@ function Base.show(io::IO, mime::MIME{Symbol("text/plain")}, F::RSVD)
 	show(io, mime, F.V)
 end
 
-# struct, iterator, and show method for skeletal decompositions
+# struct, iterator, and show method for randomized Hermitian eigenvalue decomposition
+
+struct RHEigen
+	values::Vector
+	vectors::Matrix
+end
+
+Base.iterate(F::RHEigen) = (F.values, Val(:vectors))
+Base.iterate(F::RHEigen, ::Val{:vectors}) = (F.vectors, Val(:done))
+Base.iterate(F::RHEigen, ::Val{:done}) = nothing
+
+function Base.show(io::IO, mime::MIME{Symbol("text/plain")}, F::RHEigen)
+	summary(io, F); println(io)
+	println(io, "values:")
+	show(io, mime, F.values)
+	println(io, "\nvectors:")
+	show(io, mime, F.vectors)
+end
+
+# struct, iterator, and show method for randomized skeletal decompositions
 
 struct SkeletalDecomp
 	perm::Vector

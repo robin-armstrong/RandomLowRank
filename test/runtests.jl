@@ -146,6 +146,8 @@ end
 					params = "parameters are A = "*A_name*", sk = "*string(sk)*", p = "*string(p)*", power = "*string(q)
 					
 					S = rsvd(A, numericalRank, p, power = q, sketch = sk, format = "minimal")
+					showInfo(params, @test length(S) == numericalRank)
+					
 					errvect = broadcast(i -> (S[i] - S_true[i])^2/S_true[i]^2, 1:numericalRank)
 					err = sqrt(sum(errvect)/numericalRank)
 					
@@ -154,9 +156,11 @@ end
 						@info params
 					end
 					
+					U, S, V = rsvd(A, numericalRank, p, power = q, sketch = sk)
+					showInfo(params, @test size(U) == (size(A, 1), numericalRank))
+					showInfo(params, @test size(V) == (size(A, 2), numericalRank))
 					showInfo(params, @test length(S) == numericalRank)
 					
-					U, S, V = rsvd(A, numericalRank, p, power = q, sketch = sk)
 					singvals_errvect = broadcast(i -> (S[i] - S_true[i])^2/S_true[i]^2, 1:numericalRank)
 					singvals_err = sqrt(sum(singvals_errvect)/numericalRank)
 					
@@ -171,10 +175,52 @@ end
 						@warn "rsvd tests: full format matrix estimation relative error exceeds 50"
 						@info params
 					end
-					
-					showInfo(params, @test size(U) == (size(A, 1), numericalRank))
-					showInfo(params, @test size(V) == (size(A, 2), numericalRank))
-					showInfo(params, @test length(S) == numericalRank)
+				end
+			end
+		end
+	end
+end
+
+@testset "rheigen tests" begin
+	V_true = Matrix(qr(randn(largeDim, largeDim)).Q)
+	lambda_true = residual*ones(largeDim)
+	lambda_true[1:5] = [100., -50., 30., -15., 5.]
+	A = V_true*diagm(lambda_true)*V_true'
+	numValsToTest = 5
+	
+	for sk in [noSketch, gaussianSketch]
+		for p in [0, 5, largeDim - numValsToTest]
+			for q in [0, 2, 4]
+				params = "parameters are sk = "*string(sk)*", p = "*string(p)*", power = "*string(q)
+				
+				lambda = rheigen(A, numValsToTest, p, power = q, sketch = sk, format = "minimal")
+				showInfo(params, @test length(lambda) == numValsToTest)
+				
+				errvect = broadcast(i -> (lambda[i] - lambda_true[i])^2/lambda_true[i]^2, 1:numValsToTest)
+				err = sqrt(sum(errvect)/numValsToTest)
+				
+				if(err > 50)
+					@warn "rheigen tests: minimal format eigenvalue relative error exceeds 50"
+					@info params
+				end
+				
+				lambda, V = rheigen(A, numValsToTest, p, power = q, sketch = sk)
+				showInfo(params, @test length(lambda) == numValsToTest)
+				showInfo(params, @test size(V) == (largeDim, numValsToTest))
+				
+				values_errvect = broadcast(i -> (lambda[i] - lambda_true[i])^2/lambda_true[i]^2, 1:numValsToTest)
+				values_err = sqrt(sum(lambda)/numValsToTest)
+				
+				if(values_err > 50)
+					@warn "rheigen tests: full format singular value relative error exceeds 50"
+					@info params
+				end
+				
+				err = opnorm(A - V*diagm(lambda)*V')/residual
+				
+				if(err > 50)
+					@warn "rheigen tests: full format matrix estimation relative error exceeds 50"
+					@info params
 				end
 			end
 		end
