@@ -32,14 +32,14 @@ A_wide = Matrix(A_tall')
 @testset "sketching tests" begin
     M = randn(100, 100)
     
-    sk = gaussianSketch(M, 50, "left")
-    @test size(sk) == (50, 100)
+    M_sk = sketch(M, 50, "left", GaussianSketch())
+    @test size(M_sk) == (50, 100)
     
-    sk = gaussianSketch(M, 50, "right")
-    @test size(sk) == (100, 50)
+    M_sk = sketch(M, 50, "right", GaussianSketch())
+    @test size(M_sk) == (100, 50)
     
-    sk = noSketch(M, 50, "left")
-    @test sk == M
+    M_sk = sketch(M, 50, "left", NoSketch())
+    @test M_sk == M
 end
 
 @testset "rqrcp tests" begin
@@ -50,11 +50,11 @@ end
 		A = mats[i]
 		A_name = matnames[i]
 		
-		for sk in [noSketch, gaussianSketch]
+		for s in [NoSketch, GaussianSketch]
 			for p in [0, 5, smallDim - numericalRank]
-				params = "parameters are A = "*A_name*", sk = "*string(sk)*", p = "*string(p)
+				params = "parameters are A = "*A_name*", s = "*string(s)*", p = "*string(p)
 				
-				perm = rqrcp(A, numericalRank, p, format = "minimal", sketch = sk)
+				perm = rqrcp(A, numericalRank, p, format = "minimal", sk = s())
 				Q = Matrix(qr(A[:, perm]).Q)
 				err = opnorm(A - Q*Q'*A)/residual
 				
@@ -65,7 +65,7 @@ end
 				
 				showInfo(params, @test length(perm) == numericalRank)
 				
-				perm, C, B = rqrcp(A, numericalRank, p, format = "full", sketch = sk)
+				perm, C, B = rqrcp(A, numericalRank, p, format = "full", sk = s())
 				err = opnorm(A - C*B)/residual
 				
 				if(err > 50)
@@ -78,7 +78,7 @@ end
 				showInfo(params, @test length(perm) == numericalRank)
 				
 				# testing orthonormalization
-				_, Q, B = rqrcp(A, numericalRank, p, sketch = sk, orthonormal = true)
+				_, Q, B = rqrcp(A, numericalRank, p, sk = s(), orthonormal = true)
 				showInfo(params, @test size(Q) == (size(A, 1), numericalRank))
 				showInfo(params, @test size(B) == (numericalRank, size(A, 2)))
 				showInfo(params, @test opnorm(Q'*Q - I(numericalRank)) < 1e-10)
@@ -95,11 +95,11 @@ end
 		A = mats[i]
 		A_name = matnames[i]
 		
-		for sk in [noSketch, gaussianSketch]
+		for s in [NoSketch, GaussianSketch]
 			for p in [0, 5, smallDim - numericalRank]
-				params = "parameters are A = "*A_name*", sk = "*string(sk)*", p = "*string(p)
+				params = "parameters are A = "*A_name*", s = "*string(s)*", p = "*string(p)
 				
-				perm = rgks(A, numericalRank, p, format = "minimal", sketch = sk)
+				perm = rgks(A, numericalRank, p, format = "minimal", sk = s())
 				Q = Matrix(qr(A[:, perm]).Q)
 				err = opnorm(A - Q*Q'*A)/residual
 				
@@ -110,7 +110,7 @@ end
 				
 				showInfo(params, @test length(perm) == numericalRank)
 				
-				perm, C, B = rgks(A, numericalRank, p, format = "full", sketch = sk)
+				perm, C, B = rgks(A, numericalRank, p, format = "full", sk = s())
 				err = opnorm(A - C*B)/residual
 				
 				if(err > 50)
@@ -123,7 +123,7 @@ end
 				showInfo(params, @test length(perm) == numericalRank)
 				
 				# testing orthonormalization
-				_, Q, B = rgks(A, numericalRank, p, sketch = sk, orthonormal = true)
+				_, Q, B = rgks(A, numericalRank, p, sk = s(), orthonormal = true)
 				showInfo(params, @test size(Q) == (size(A, 1), numericalRank))
 				showInfo(params, @test size(B) == (numericalRank, size(A, 2)))
 				showInfo(params, @test opnorm(Q'*Q - I(numericalRank)) < 1e-10)
@@ -140,12 +140,12 @@ end
 		A = mats[i]
 		A_name = matnames[i]
 		
-		for sk in [noSketch, gaussianSketch]
+		for s in [NoSketch, GaussianSketch]
 			for p in [0, 5, smallDim - numericalRank]
 				for q in [0, 2, 4]
-					params = "parameters are A = "*A_name*", sk = "*string(sk)*", p = "*string(p)*", power = "*string(q)
+					params = "parameters are A = "*A_name*", s = "*string(s)*", p = "*string(p)*", power = "*string(q)
 					
-					S = rsvd(A, numericalRank, p, power = q, sketch = sk, format = "minimal")
+					S = rsvd(A, numericalRank, p, power = q, sk = s(), format = "minimal")
 					showInfo(params, @test length(S) == numericalRank)
 					
 					errvect = broadcast(i -> (S[i] - S_true[i])^2/S_true[i]^2, 1:numericalRank)
@@ -156,7 +156,7 @@ end
 						@info params
 					end
 					
-					U, S, V = rsvd(A, numericalRank, p, power = q, sketch = sk)
+					U, S, V = rsvd(A, numericalRank, p, power = q, sk = s())
 					showInfo(params, @test size(U) == (size(A, 1), numericalRank))
 					showInfo(params, @test size(V) == (size(A, 2), numericalRank))
 					showInfo(params, @test length(S) == numericalRank)
@@ -188,12 +188,12 @@ end
 	A = V_true*diagm(lambda_true)*V_true'
 	numValsToTest = 5
 	
-	for sk in [noSketch, gaussianSketch]
+	for s in [NoSketch, GaussianSketch]
 		for p in [0, 5, largeDim - numValsToTest]
 			for q in [0, 2, 4]
-				params = "parameters are sk = "*string(sk)*", p = "*string(p)*", power = "*string(q)
+				params = "parameters are s = "*string(s)*", p = "*string(p)*", power = "*string(q)
 				
-				lambda = rheigen(A, numValsToTest, p, power = q, sketch = sk, format = "minimal")
+				lambda = rheigen(A, numValsToTest, p, power = q, sk = s(), format = "minimal")
 				showInfo(params, @test length(lambda) == numValsToTest)
 				
 				errvect = broadcast(i -> (lambda[i] - lambda_true[i])^2/lambda_true[i]^2, 1:numValsToTest)
@@ -204,7 +204,7 @@ end
 					@info params
 				end
 				
-				lambda, V = rheigen(A, numValsToTest, p, power = q, sketch = sk)
+				lambda, V = rheigen(A, numValsToTest, p, power = q, sk = s())
 				showInfo(params, @test length(lambda) == numValsToTest)
 				showInfo(params, @test size(V) == (largeDim, numValsToTest))
 				

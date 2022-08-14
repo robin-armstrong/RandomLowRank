@@ -1,18 +1,18 @@
 using LinearAlgebra
 
 """
-	rgks(A, k, p = 0; format = "full", sketch = gaussianSketch, orthonormal = false)
+	rgks(A, k, p = 0; format = "full", sk = gaussianSketch(), orthonormal = false)
 
 Compute an approximate factorization `A = C*B` where `C` consists of `k` skeleton
 columns from `A`. Choose columns using the procedure of Golub, Klemma, and Stewart (1976) 
-on `sketch(A, k, p)`, where `p` is an oversampling parameter. If `returnFormat == "minimal"`
+on a sketch of `A` computed according to `k`, using oversampling `p`. If `returnFormat == "minimal"`
 then only the indices of the skeleton columns are computed. If `returnFormat == "full"` then
 `C`, `B` are returned along with the indices of the skeleton columns. If `orthonormal == true`
 then the columns of `R1` are orthonormalized. 
 """
 function rgks(A::Matrix, k::Integer, p::Integer = 0 ;
 				format::String = "full",
-				sketch = gaussianSketch,
+				sk::Sketch = gaussianSketch(),
 				orthonormal::Bool = false)
 	
 	if((k < 0) || (k > min(size(A, 1), size(A, 2))))
@@ -25,8 +25,8 @@ function rgks(A::Matrix, k::Integer, p::Integer = 0 ;
 		throw(ErrorException("options for return format are `minimal` and `full`"))
 	end
 	
-	sk = sketch(A, k + p, "right")
-	Q = Matrix(qr(sk).Q)
+	A_sk = sketch(A, k + p, "right", sk)
+	Q = Matrix(qr(A_sk).Q)
 	V = Matrix(svd(Q'*A).V)[:, 1:k]
 	qrobj = qr(V', ColumnNorm())
 	perm = qrobj.p[1:k]

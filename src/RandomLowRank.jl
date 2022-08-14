@@ -1,6 +1,16 @@
 module RandomLowRank
 
-export rqrcp, rgks, rsvd, rheigen, noSketch, gaussianSketch, RSVD, SkeletalDecomp, OrthoSkeletalDecomp, RankError, SketchError
+# lowrank methods
+export rqrcp, rgks, rsvd, rheigen
+
+# structs and methods related to sketching
+export sketch, Sketch, NoSketch, GaussianSketch
+
+# structs returned by lowrank methods
+export RSVD, SkeletalDecomp, OrthoSkeletalDecomp
+
+# custom exceptions
+export RankError, SketchError
 
 include("exceptions.jl")
 include("sketches.jl")

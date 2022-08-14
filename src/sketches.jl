@@ -1,18 +1,35 @@
-#=
-Functions to compute randomized sketches of matrices. Each has the signature
-`mySketch(A::Matrix, l::Integer, side::String)`, where`A` is the matrix being
-sketched and `l` indicates the target dimension of the sketch. If `side == "left"`
-then the returned matrix has dimensions `(c, size(A, 2))` where `c >= l`, and if
-`side == "right"` then the returned matrix has dimensions `(size(A, 1), r)` with
-`r >= l`.
-=#
+"""
+An abstract type whose subtypes represent different procedures for matrix sketching.
+For any concrete type `ConcreteSketch <: Sketch` the method
 
-# a "do-nothing" sketch to allow for deterministic use of sketching-based algorithms.
-function noSketch(A::Matrix, l::Integer, side::String)
+	sketch(A::Matrix, l::Integer, side::String, sk::ConcreteSketch)
+	
+must be implemented. This method returns the sketch of `A` according to the 
+procedure that `ConcreteSketch` specifies, in such a way that the column
+dimension is preserved (for `side == "right"`) or the row dimension is preserved
+(for `side == "left"`). The non-preserved dimension of the returned matrix must be
+at least `l`.
+"""
+abstract type Sketch
+end
+
+"""
+A "do-nothing" sketch to allow for deterministic use of sketching-based algorithms.
+"""
+struct NoSketch <: Sketch
+end
+
+function sketch(A::Matrix, l::Integer, side::String, sk::NoSketch)
 	return deepcopy(A)
 end
 
-function gaussianSketch(A::Matrix, l::Integer, side::String)
+"""
+Gaussian sketching, wherein `A` is multiplied by a standard Gaussian matrix.
+"""
+struct GaussianSketch <: Sketch
+end
+
+function sketch(A::Matrix, l::Integer, side::String, sketch::GaussianSketch)
 	if(l < 1)
 	    throw(SketchError("target dimension of sketch must be positive"))
 	elseif(side == "left")

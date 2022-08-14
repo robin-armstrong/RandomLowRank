@@ -1,12 +1,12 @@
 using LinearAlgebra
 
 """
-	rheigen(A, k, p = 0; power = 0, format = "full", sketch = gaussianSketch, tol = 1e-12)
+	rheigen(A, k, p = 0; power = 0, format = "full", sk = gaussianSketch(), tol = 1e-12)
 
 Compute an approximate factorization `A = V*diagm(lambda)*V'` for the Hermitian matrix `A`, where
 `V` consists of `k` orthonormal columns (eigenvector estimates) and `lambda` is a vector of
 length `k` (eigenvalue estimates) using the algorithm of Halko, Martinsson, and Tropp (2011) 
-with oversampling `p`, `power` steps of power iteration, and sketching specified by `sketch`.
+with oversampling `p`, `power` steps of power iteration, and sketching specified by `sk`.
 Estimates correspond to the `k` eigenvalues of `A` which are largest in magnitude. If 
 `format == "minimal"` then only the eigenvalue estimates are computed. If `format == "full"` then
 `lambda, V` are returned. An error will be thrown if `A` differs from `Hermitian(A)` by more than
@@ -15,7 +15,7 @@ Estimates correspond to the `k` eigenvalues of `A` which are largest in magnitud
 function rheigen(A::Matrix, k::Integer, p::Integer = 0 ;
 					power::Integer = 0,
 					format::String = "full",
-					sketch = gaussianSketch,
+					sk::Sketch = gaussianSketch(),
 					tol = 1e-12)
 	
 	if(size(A, 1) != size(A, 2))
@@ -40,8 +40,8 @@ function rheigen(A::Matrix, k::Integer, p::Integer = 0 ;
 		throw(ErrorException("options for return format are `minimal` and `full`"))
 	end
 	
-	sk = sketch(A, k + p, "right")
-	Q = Matrix(qr(sk).Q)
+	A_sk = sketch(A, k + p, "right", sk)
+	Q = Matrix(qr(A_sk).Q)
 	
 	for i = 1:power
 		Q = Matrix(qr(A*Q).Q)
