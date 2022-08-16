@@ -7,7 +7,7 @@ export rqrcp, rgks, rsvd, rheigen
 export sketch, Sketch, NoSketch, GaussianSketch
 
 # structs returned by lowrank methods
-export RSVD, SkeletalDecomp, OrthoSkeletalDecomp
+export RSVD, RHEigen, SkeletalDecomp, OrthoSkeletalDecomp
 
 # custom exceptions
 export RankError, SketchError

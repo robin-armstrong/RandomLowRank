@@ -1,4 +1,3 @@
 # RandomLowRank
 
-Randomized algorithms for efficiently computing low-rank approximations of matrices in Julia.
-
+Randomized low-rank algorithms for numerical linear algebra in Julia.
