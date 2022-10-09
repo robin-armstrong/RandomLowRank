@@ -3,12 +3,7 @@ using LinearAlgebra
 """
 	rsvd(A, k, p = 0; power = 0, minimal = false, sk = GaussianSketch())
 
-Compute an approximate factorization `A = U*diagm(S)*V'` where `U` and `V` consist
-of `k` orthonormal columns (singular vector estimates )and `S` is a vector of length `k`
-(singular value estimates) using the algorithm of Halko, Martinsson, and Tropp (2011) 
-with oversampling `p`, `power` steps of power iteration, and sketching specified by `sk`.
-If `minimal == true` then `U` is not computed and only the singular value estmiates are 
-returned. If  `minimal == false` then `U`, `S`, `V` are returned.
+Compute an approximate factorization `A = U*diagm(S)*V'` where `U` and `V` consist of `k` orthonormal columns (singular vector estimates )and `S` is a vector of length `k` (singular value estimates) using the algorithm of Halko, Martinsson, and Tropp (2011) with oversampling `p`, `power` steps of power iteration, and sketching specified by `sk`. If `minimal == true` then `U` is not computed and only the singular value estmiates are returned. If  `minimal == false` then `U`, `S`, `V` are returned.
 """
 function rsvd(A::Matrix, k::Integer, p::Integer = 0 ;
 				power::Integer = 0,
