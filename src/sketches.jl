@@ -21,7 +21,7 @@ function sketch(A::Matrix, l::Integer, side::String, sk::NoSketch)
 end
 
 """
-Gaussian sketching, wherein the input matrix is multiplied by a standard Gaussian matrix.
+Matrix sketching via multiplication with a standard Gaussian matrix.
 """
 struct GaussianSketch <: Sketch
 end
@@ -49,10 +49,10 @@ end
 """
 Matrix sketching via a subsampled random Hadamard transform.
 """
-struct SRHTSketch <: Sketch
+struct HadamardSketch <: Sketch
 end
 
-function sketch(A::Matrix, l::Integer, side::String, sk::SRHTSketch)
+function sketch(A::Matrix, l::Integer, side::String, sk::HadamardSketch)
 	if(l < 1)
 	    throw(SketchError("target dimension of sketch must be positive"))
 	elseif(side == "left")
@@ -105,6 +105,60 @@ function sketch(A::Matrix, l::Integer, side::String, sk::SRHTSketch)
 	    
 	    return presketch[:, colindices]/sqrt(l)
 	    
+	else
+	    throw(SketchError("unsupported sketching specifier '"*side*"'"))
+	end
+end
+
+"""
+Matrix sketching via a Clarkson-Woodruff transform.
+"""
+struct CWSketch <: Sketch
+end
+
+function sketch(A::Matrix, l::Integer, side::String, sk::CWSketch)
+	if(l < 1)
+	    throw(SketchError("target dimension of sketch must be positive"))
+	elseif(side == "left")
+		if(l > size(A, 1))
+	        throw(SketchError("column dimension of sketch ("*string(l)*") cannot exceed column dimension of matrix ("*string(size(A, 1))*")"))
+	    end
+	    
+		signs = rand(Bool, size(A, 1))
+		row_unused = ones(Bool, size(A, 1))
+		sketchedmat = zeros(l, size(A, 2))
+		
+		for i = 1:l
+			for r = 1:size(A, 1)
+				if(row_unused[r] && ((i == l) || (rand() < 1/(l - i + 1))))
+					sketchedmat[i, :] += A[r, :]*(-1)^signs[r]
+					row_unused[r] = false
+				end
+			end
+		end
+		
+		return sketchedmat
+		
+	elseif(side == "right")
+		if(l > size(A, 2))
+	        throw(SketchError("row dimension of sketch ("*string(l)*") cannot exceed row dimension of matrix ("*string(size(A, 2))*")"))
+	    end
+	    
+	    signs = rand(Bool, size(A, 2))
+		col_unused = ones(Bool, size(A, 2))
+		sketchedmat = zeros(size(A, 1), l)
+		
+		for i = 1:l
+			for c = 1:size(A, 2)
+				if(col_unused[c] && ((i == l) || (rand() < 1/(l - i + 1))))
+					sketchedmat[:, i] += A[:, c]*(-1)^signs[c]
+					col_unused[c] = false
+				end
+			end
+		end
+		
+		return sketchedmat
+		
 	else
 	    throw(SketchError("unsupported sketching specifier '"*side*"'"))
 	end

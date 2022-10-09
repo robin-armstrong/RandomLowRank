@@ -4,7 +4,7 @@ module RandomLowRank
 export rqrcp, rgks, rsvd, rheigen
 
 # structs and methods related to sketching
-export sketch, Sketch, NoSketch, GaussianSketch, SRHTSketch
+export sketch, Sketch, NoSketch, GaussianSketch, HadamardSketch, CWSketch
 
 # structs returned by lowrank methods
 export RSVD, RHEigen, SkeletalDecomp, OrthoSkeletalDecomp

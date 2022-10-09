@@ -40,6 +40,18 @@ A_wide = Matrix(A_tall')
     
     M_sk = sketch(M, 50, "left", NoSketch())
     @test M_sk == M
+    
+    M_sk = sketch(M, 50, "left", HadamardSketch())
+    @test size(M_sk) == (50, 100)
+    
+    M_sk = sketch(M, 50, "right", HadamardSketch())
+    @test size(M_sk) == (100, 50)
+    
+    M_sk = sketch(M, 50, "left", CWSketch())
+    @test size(M_sk) == (50, 100)
+    
+    M_sk = sketch(M, 50, "right", CWSketch())
+    @test size(M_sk) == (100, 50)
 end
 
 @testset "rqrcp tests" begin
@@ -50,11 +62,11 @@ end
 		A = mats[i]
 		A_name = matnames[i]
 		
-		for s in [NoSketch, GaussianSketch]
+		for s in [NoSketch, GaussianSketch, HadamardSketch, CWSketch]
 			for p in [0, 5, smallDim - numericalRank]
 				params = "parameters are A = "*A_name*", s = "*string(s)*", p = "*string(p)
 				
-				perm = rqrcp(A, numericalRank, p, minimal = true, sk = s())
+				perm = rqrcp(A, numericalRank, oversamp = p, minimal = true, sk = s())
 				Q = Matrix(qr(A[:, perm]).Q)
 				err = opnorm(A - Q*Q'*A)/residual
 				
@@ -65,7 +77,7 @@ end
 				
 				showInfo(params, @test length(perm) == numericalRank)
 				
-				perm, C, B = rqrcp(A, numericalRank, p, sk = s())
+				perm, C, B = rqrcp(A, numericalRank, oversamp = p, sk = s())
 				err = opnorm(A - C*B)/residual
 				
 				if(err > 50)
@@ -78,7 +90,7 @@ end
 				showInfo(params, @test length(perm) == numericalRank)
 				
 				# testing orthonormalization
-				_, Q, B = rqrcp(A, numericalRank, p, sk = s(), orthonormal = true)
+				_, Q, B = rqrcp(A, numericalRank, oversamp = p, sk = s(), orthonormal = true)
 				showInfo(params, @test size(Q) == (size(A, 1), numericalRank))
 				showInfo(params, @test size(B) == (numericalRank, size(A, 2)))
 				showInfo(params, @test opnorm(Q'*Q - I(numericalRank)) < 1e-10)
@@ -95,11 +107,11 @@ end
 		A = mats[i]
 		A_name = matnames[i]
 		
-		for s in [NoSketch, GaussianSketch]
+		for s in [NoSketch, GaussianSketch, HadamardSketch, CWSketch]
 			for p in [0, 5, smallDim - numericalRank]
 				params = "parameters are A = "*A_name*", s = "*string(s)*", p = "*string(p)
 				
-				perm = rgks(A, numericalRank, p, minimal = true, sk = s())
+				perm = rgks(A, numericalRank, oversamp = p, minimal = true, sk = s())
 				Q = Matrix(qr(A[:, perm]).Q)
 				err = opnorm(A - Q*Q'*A)/residual
 				
@@ -110,7 +122,7 @@ end
 				
 				showInfo(params, @test length(perm) == numericalRank)
 				
-				perm, C, B = rgks(A, numericalRank, p, sk = s())
+				perm, C, B = rgks(A, numericalRank, oversamp = p, sk = s())
 				err = opnorm(A - C*B)/residual
 				
 				if(err > 50)
@@ -123,7 +135,7 @@ end
 				showInfo(params, @test length(perm) == numericalRank)
 				
 				# testing orthonormalization
-				_, Q, B = rgks(A, numericalRank, p, sk = s(), orthonormal = true)
+				_, Q, B = rgks(A, numericalRank, oversamp = p, sk = s(), orthonormal = true)
 				showInfo(params, @test size(Q) == (size(A, 1), numericalRank))
 				showInfo(params, @test size(B) == (numericalRank, size(A, 2)))
 				showInfo(params, @test opnorm(Q'*Q - I(numericalRank)) < 1e-10)
@@ -140,12 +152,12 @@ end
 		A = mats[i]
 		A_name = matnames[i]
 		
-		for s in [NoSketch, GaussianSketch]
+		for s in [NoSketch, GaussianSketch, HadamardSketch, CWSketch]
 			for p in [0, 5, smallDim - numericalRank]
 				for q in [0, 2, 4]
 					params = "parameters are A = "*A_name*", s = "*string(s)*", p = "*string(p)*", power = "*string(q)
 					
-					S = rsvd(A, numericalRank, p, power = q, sk = s(), minimal = true)
+					S = rsvd(A, numericalRank, oversamp = p, power = q, sk = s(), minimal = true)
 					showInfo(params, @test length(S) == numericalRank)
 					
 					errvect = broadcast(i -> (S[i] - S_true[i])^2/S_true[i]^2, 1:numericalRank)
@@ -156,7 +168,7 @@ end
 						@info params
 					end
 					
-					U, S, V = rsvd(A, numericalRank, p, power = q, sk = s())
+					U, S, V = rsvd(A, numericalRank, oversamp = p, power = q, sk = s())
 					showInfo(params, @test size(U) == (size(A, 1), numericalRank))
 					showInfo(params, @test size(V) == (size(A, 2), numericalRank))
 					showInfo(params, @test length(S) == numericalRank)
@@ -188,12 +200,12 @@ end
 	A = V_true*diagm(lambda_true)*V_true'
 	numValsToTest = 5
 	
-	for s in [NoSketch, GaussianSketch]
+	for s in [NoSketch, GaussianSketch, HadamardSketch, CWSketch]
 		for p in [0, 5, largeDim - numValsToTest]
 			for q in [0, 2, 4]
 				params = "parameters are s = "*string(s)*", p = "*string(p)*", power = "*string(q)
 				
-				lambda = rheigen(A, numValsToTest, p, power = q, sk = s(), minimal = true)
+				lambda = rheigen(A, numValsToTest, oversamp = p, power = q, sk = s(), minimal = true)
 				showInfo(params, @test length(lambda) == numValsToTest)
 				
 				errvect = broadcast(i -> (lambda[i] - lambda_true[i])^2/lambda_true[i]^2, 1:numValsToTest)
@@ -204,7 +216,7 @@ end
 					@info params
 				end
 				
-				lambda, V = rheigen(A, numValsToTest, p, power = q, sk = s())
+				lambda, V = rheigen(A, numValsToTest, oversamp = p, power = q, sk = s())
 				showInfo(params, @test length(lambda) == numValsToTest)
 				showInfo(params, @test size(V) == (largeDim, numValsToTest))
 				

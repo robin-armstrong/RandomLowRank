@@ -1,11 +1,12 @@
 using LinearAlgebra
 
 """
-	rheigen(A, k, p = 0; power = 0, minimal = false, sk = GaussianSketch(), tol = 1e-12)
+	rheigen(A, k; oversamp = 0, power = 0, minimal = false, sk = GaussianSketch(), tol = 1e-12)
 
-Compute an approximate factorization `A = V*diagm(lambda)*V'` for the Hermitian matrix `A`, where `V` consists of `k` orthonormal columns (eigenvector estimates) and `lambda` is a vector of length `k` (eigenvalue estimates) using the algorithm of Halko, Martinsson, and Tropp (2011) with oversampling `p`, `power` steps of power iteration, and sketching specified by `sk`. If `minimal == true` then only the eigenvalue estimates are computed. If `minimal == false` then `lambda, V` are returned. An error will be thrown if `A` differs from `Hermitian(A)` by more than `tol` in the Frobenius norm.
+Compute an approximate factorization `A = V*diagm(lambda)*V'` for the Hermitian matrix `A`, where `V` consists of `k` orthonormal columns (eigenvector estimates) and `lambda` is a vector of length `k` (eigenvalue estimates) using the algorithm of Halko, Martinsson, and Tropp (2011) with oversampling `oversamp`, `power` steps of power iteration, and sketching specified by `sk`. If `minimal == true` then only the eigenvalue estimates are computed. If `minimal == false` then `lambda, V` are returned. An error will be thrown if `A` differs from `Hermitian(A)` by more than `tol` in the Frobenius norm.
 """
-function rheigen(A::Matrix, k::Integer, p::Integer = 0 ;
+function rheigen(A::Matrix, k::Integer ;
+					oversamp::Integer = 0,
 					power::Integer = 0,
 					minimal::Bool = false,
 					sk::Sketch = GaussianSketch(),
@@ -26,11 +27,11 @@ function rheigen(A::Matrix, k::Integer, p::Integer = 0 ;
 	elseif((k < 0) || (k > min(size(A, 1), size(A, 2))))
 		throw(RankError("the target rank ("*string(k)*") must be at least 1 and at most "*string(min(size(A, 1), size(A, 2)))))
 	
-	elseif(p < 0)
-		throw(SketchError("the oversampling parameter ("*string(p)*") must be nonnegative"))
+	elseif(oversamp < 0)
+		throw(SketchError("the oversampling parameter ("*string(oversamp)*") must be nonnegative"))
 	end
 	
-	A_sk = sketch(A, k + p, "right", sk)
+	A_sk = sketch(A, k + oversamp, "right", sk)
 	Q = Matrix(qr(A_sk).Q)
 	
 	for i = 1:power
