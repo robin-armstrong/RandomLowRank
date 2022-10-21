@@ -3,7 +3,7 @@ using LinearAlgebra
 """
 	rsvd(A, k; oversamp = 0, power = 0, minimal = false, sk = GaussianSketch())
 
-Compute an approximate factorization `A = U*diagm(S)*V'` where `U` and `V` consist of `k` orthonormal columns (singular vector estimates )and `S` is a vector of length `k` (singular value estimates) using the algorithm of Halko, Martinsson, and Tropp (2011) with oversampling `oversamp`, `power` steps of power iteration, and sketching specified by `sk`. If `minimal == true` then `U` is not computed and only the singular value estmiates are returned. If  `minimal == false` then `U`, `S`, `V` are returned.
+Compute an approximate factorization `A = U*diagm(S)*Vt` where `U` consists of `k` orthonormal columns (left singular vector estimates), `Vt` consists of `k` orthonormal rows (right singular vector estimates), and `S` is a vector of length `k` (singular value estimates) using the algorithm of Halko, Martinsson, and Tropp (2011) with oversampling `oversamp`, `power` steps of power iteration, and sketching specified by `sk`. If `minimal == true` then `U` is not computed and only the singular value estmiates are returned. If  `minimal == false` then `U`, `S`, and `Vt` are returned.
 """
 function rsvd(A::Matrix, k::Integer ; 
 				oversamp::Integer = 0,
@@ -35,7 +35,7 @@ function rsvd(A::Matrix, k::Integer ;
 	end
 	
 	U = Q*svdobj.U[:, 1:k]
-	V = Matrix(svdobj.V)[:, 1:k]
+	Vt = svdobj.Vt[1:k, :]
 	
-	return RSVD(U, svdobj.S[1:k], V)
+	return RSVD(U, svdobj.S[1:k], Vt)
 end

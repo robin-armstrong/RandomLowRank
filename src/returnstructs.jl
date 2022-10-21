@@ -3,12 +3,12 @@
 struct RSVD
 	U::Matrix
 	S::Vector
-	V::Matrix
+	Vt::Matrix
 end
 
 Base.iterate(F::RSVD) = (F.U, Val(:S))
-Base.iterate(F::RSVD, ::Val{:S}) = (F.S, Val(:V))
-Base.iterate(F::RSVD, ::Val{:V}) = (F.V, Val(:done))
+Base.iterate(F::RSVD, ::Val{:S}) = (F.S, Val(:Vt))
+Base.iterate(F::RSVD, ::Val{:Vt}) = (F.Vt, Val(:done))
 Base.iterate(F::RSVD, ::Val{:done}) = nothing
 
 function Base.show(io::IO, mime::MIME{Symbol("text/plain")}, F::RSVD)
@@ -17,8 +17,8 @@ function Base.show(io::IO, mime::MIME{Symbol("text/plain")}, F::RSVD)
 	show(io, mime, F.U)
 	println(io, "\nsingular values:")
 	show(io, mime, F.S)
-	println(io, "\nV factor:")
-	show(io, mime, F.V)
+	println(io, "\nVt factor:")
+	show(io, mime, F.Vt)
 end
 
 # struct, iterator, and show method for randomized Hermitian eigenvalue decomposition

@@ -168,9 +168,9 @@ end
 						@info params
 					end
 					
-					U, S, V = rsvd(A, numericalRank, oversamp = p, power = q, sk = s())
+					U, S, Vt = rsvd(A, numericalRank, oversamp = p, power = q, sk = s())
 					showInfo(params, @test size(U) == (size(A, 1), numericalRank))
-					showInfo(params, @test size(V) == (size(A, 2), numericalRank))
+					showInfo(params, @test size(Vt) == (numericalRank, size(A, 2)))
 					showInfo(params, @test length(S) == numericalRank)
 					
 					singvals_errvect = broadcast(i -> (S[i] - S_true[i])^2/S_true[i]^2, 1:numericalRank)
@@ -181,7 +181,7 @@ end
 						@info params
 					end
 					
-					err = opnorm(A - U*diagm(S)*V')/residual
+					err = opnorm(A - U*diagm(S)*Vt)/residual
 					
 					if(err > 50)
 						@warn "rsvd tests: full format matrix estimation relative error exceeds 50"
