@@ -1,3 +1,8 @@
+"""
+Randomized low-rank algorithms for numerical linear algebra. Provides functions for computing
+approximate eigenvalue, singular value, and interpolative decompositions using randomized
+sketching.
+"""
 module RandomLowRank
 
 # lowrank methods

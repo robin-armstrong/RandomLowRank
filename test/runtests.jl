@@ -2,7 +2,7 @@ using RandomLowRank
 using LinearAlgebra
 using Test
 
-# function to print debug messages for failed test
+# function to print debug messages for failed tests
 function showInfo(msg, testResult)
 	if(typeof(testResult) != Test.Pass)
 		@info msg
@@ -30,28 +30,28 @@ A_tall = U_true*diagm(S_true)*V_true'
 A_wide = Matrix(A_tall')
 
 @testset "sketching tests" begin
-    M = randn(100, 100)
-    
-    M_sk = sketch(M, 50, "left", GaussianSketch())
-    @test size(M_sk) == (50, 100)
-    
-    M_sk = sketch(M, 50, "right", GaussianSketch())
-    @test size(M_sk) == (100, 50)
-    
-    M_sk = sketch(M, 50, "left", NoSketch())
-    @test M_sk == M
-    
-    M_sk = sketch(M, 50, "left", HadamardSketch())
-    @test size(M_sk) == (50, 100)
-    
-    M_sk = sketch(M, 50, "right", HadamardSketch())
-    @test size(M_sk) == (100, 50)
-    
-    M_sk = sketch(M, 50, "left", CWSketch())
-    @test size(M_sk) == (50, 100)
-    
-    M_sk = sketch(M, 50, "right", CWSketch())
-    @test size(M_sk) == (100, 50)
+	M = randn(100, 100)
+
+	M_sk = sketch(M, 50, "left", GaussianSketch())
+	@test size(M_sk) == (50, 100)
+
+	M_sk = sketch(M, 50, "right", GaussianSketch())
+	@test size(M_sk) == (100, 50)
+
+	M_sk = sketch(M, 50, "left", NoSketch())
+	@test M_sk == M
+
+	M_sk = sketch(M, 50, "left", HadamardSketch())
+	@test size(M_sk) == (50, 100)
+
+	M_sk = sketch(M, 50, "right", HadamardSketch())
+	@test size(M_sk) == (100, 50)
+
+	M_sk = sketch(M, 50, "left", CWSketch())
+	@test size(M_sk) == (50, 100)
+
+	M_sk = sketch(M, 50, "right", CWSketch())
+	@test size(M_sk) == (100, 50)
 end
 
 @testset "rqrcp tests" begin
