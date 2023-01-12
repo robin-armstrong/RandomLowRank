@@ -261,10 +261,10 @@ end
 				showInfo(params, @test size(V) == (largeDim, numValsToTest))
 				
 				values_errvect = broadcast(i -> (lambda[i] - lambda_true[i])^2/lambda_true[i]^2, 1:numValsToTest)
-				values_err = sqrt(sum(lambda)/numValsToTest)
+				values_err = sqrt(sum(values_errvect)/numValsToTest)
 				
 				if(values_err > 50)
-					@warn "rheigen tests: full format singular value relative error exceeds 50"
+					@warn "rheigen tests: full format eigenvalue relative error exceeds 50"
 					@info params
 				end
 				
