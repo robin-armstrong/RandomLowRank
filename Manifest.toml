@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.2"
+julia_version = "1.8.3"
 manifest_format = "2.0"
-project_hash = "c1fff40cd95f29e4587b9d532ba3cbc920ed1ad3"
+project_hash = "fd56ba59bc5d49ac7093748908026b9ed9de7330"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
